@@ -1,10 +1,26 @@
 import json
 import pika
+import time
 from app.settings import settings
 
 EXCHANGE_NAME = "fraud.events"
 QUEUE_NAME = "fraud.auth"
 ROUTING_KEY = "fraud.auth_requested"
+
+
+def connect_with_retry(max_retries=20, delay=5):
+    params = pika.URLParameters(settings.rabbitmq_url)
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            connection = pika.BlockingConnection(params)
+            print("Connected to RabbitMQ")
+            return connection
+        except Exception as e:
+            print(f"RabbitMQ not ready (attempt {attempt}/{max_retries}): {e}")
+            time.sleep(delay)
+
+    raise RuntimeError("Could not connect to RabbitMQ after retries")
 
 
 def callback(ch, method, properties, body):
@@ -14,8 +30,7 @@ def callback(ch, method, properties, body):
 
 
 def main():
-    params = pika.URLParameters(settings.rabbitmq_url)
-    connection = pika.BlockingConnection(params)
+    connection = connect_with_retry()
     channel = connection.channel()
 
     channel.exchange_declare(exchange=EXCHANGE_NAME, exchange_type="topic", durable=True)
