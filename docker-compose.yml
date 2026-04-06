@@ -1,4 +1,47 @@
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - postgres
+
+  alert-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    command: ["python", "workers/alert_worker.py"]
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+
+  auth-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    command: ["python", "workers/auth_worker.py"]
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+
+  audit-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    command: ["python", "workers/audit_worker.py"]
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - postgres
+
   postgres:
     image: postgres:16
     environment:
