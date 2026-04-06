@@ -8,6 +8,8 @@ from app.preprocess import prepare_dataframe, transform_features
 from app.inference import predict_fraud
 from app.events import publish_event
 
+from app.demo import router as demo_router
+
 app = FastAPI(title="Fraud Detection API")
 
 REQUEST_COUNT = Counter(
