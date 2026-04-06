@@ -1,22 +1,31 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, Dict, Any
+from pydantic import BaseModel
 
 
 class FraudPredictionRequest(BaseModel):
-    transaction_id: str = Field(..., examples=["txn_12345"])
-    customer_name: Optional[str] = None
-    customer_email: Optional[EmailStr] = None
-    customer_phone: Optional[str] = None
+    amount_usd: float
+    fee: float
+    exchange_rate_src_to_dest: float
+    corridor_risk: float
+    txn_velocity_1h: int
+    txn_velocity_24h: int
+    new_device: int
+    device_trust_score: float
+    location_mismatch: int
+    ip_country: str
+    ip_risk_score: float
+    risk_score_internal: float
+    combined_risk_score: float
+    chargeback_history_count: int
+    kyc_tier: str
+    account_age_days: int
+    home_country: str
+    account_age_group: str
+    hour: int
+    day_of_week: int
+    is_weekend: int
+    is_night: int
+    amount_outlier: int
 
-    amount: float
-    country: str
-    device_type: Optional[str] = "unknown"
-    payment_method: Optional[str] = "unknown"
-    new_device: Optional[bool] = False
-    location_mismatch: Optional[bool] = False
-
-    class Config:
-        extra = "allow"  
 
 class FraudPredictionResponse(BaseModel):
     prediction: str
@@ -24,5 +33,5 @@ class FraudPredictionResponse(BaseModel):
     risk_level: str
     threshold: float
     timestamp: str
-    authentication: Optional[Dict[str, Any]] = None
-    alert: Optional[str] = None
+    authentication: dict | None = None
+    alert: str | None = None
