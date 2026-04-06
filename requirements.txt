@@ -18,3 +18,4 @@ pika
 sqlalchemy
 psycopg2-binary
 email-validator
+prometheus-client
