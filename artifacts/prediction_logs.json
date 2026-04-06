@@ -1,0 +1,212 @@
+[
+    {
+        "timestamp": "2026-03-29T01:33:30.157126",
+        "input": {
+            "amount_usd": 45,
+            "fee": 0.5,
+            "exchange_rate_src_to_dest": 1.0,
+            "corridor_risk": 0.01,
+            "txn_velocity_1h": 1,
+            "new_device": false,
+            "device_trust_score": 0.95,
+            "location_mismatch": false,
+            "ip_country": "us",
+            "kyc_tier": "high",
+            "account_age_days": 400,
+            "account_age_group": "old",
+            "home_country": "us",
+            "hour": 14,
+            "day_of_week": 2,
+            "is_weekend": 0,
+            "is_night": 0,
+            "amount_outlier": 0
+        },
+        "prediction": "NOT FRAUD",
+        "probability": 0.0011332040885463357,
+        "threshold": 0.1
+    },
+    {
+        "timestamp": "2026-03-29T01:35:22.801087",
+        "input": {
+            "amount_usd": 2500,
+            "fee": 15,
+            "exchange_rate_src_to_dest": 1.2,
+            "corridor_risk": 0.35,
+            "txn_velocity_1h": 8,
+            "new_device": true,
+            "device_trust_score": 0.1,
+            "location_mismatch": true,
+            "ip_country": "ng",
+            "kyc_tier": "low",
+            "account_age_days": 3,
+            "account_age_group": "new",
+            "home_country": "us",
+            "hour": 2,
+            "day_of_week": 6,
+            "is_weekend": 1,
+            "is_night": 1,
+            "amount_outlier": 1
+        },
+        "prediction": "FRAUD",
+        "probability": 0.13269038498401642,
+        "threshold": 0.1
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.1327,
+        "risk_level": "LOW",
+        "threshold": 0.1,
+        "timestamp": "2026-03-29T03:19:59.344954",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.1378,
+        "risk_level": "LOW",
+        "threshold": 0.1,
+        "timestamp": "2026-03-29T03:32:37.891031",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "NOT FRAUD",
+        "fraud_probability": 0.0025,
+        "risk_level": "LOW",
+        "threshold": 0.1,
+        "timestamp": "2026-03-29T04:27:39.443678",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "NOT FRAUD",
+        "fraud_probability": 0.0623,
+        "risk_level": "LOW",
+        "threshold": 0.1,
+        "timestamp": "2026-03-29T04:29:07.349206",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.1378,
+        "risk_level": "LOW",
+        "threshold": 0.1,
+        "timestamp": "2026-03-29T04:30:23.366075",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.1378,
+        "risk_level": "LOW",
+        "threshold": 0.1,
+        "timestamp": "2026-03-29T04:49:49.541302",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.1378,
+        "risk_level": "LOW",
+        "threshold": 0.1,
+        "timestamp": "2026-03-29T05:01:04.547382",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.9316,
+        "risk_level": "HIGH",
+        "threshold": 0.0493,
+        "timestamp": "2026-03-29T06:12:07.234327",
+        "alert": "EMAIL_SENT_TO_STAKEHOLDERS"
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.9316,
+        "risk_level": "HIGH",
+        "threshold": 0.0493,
+        "timestamp": "2026-03-29T07:00:58.514640",
+        "alert": "EMAIL_SENT_TO_STAKEHOLDERS"
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.9316,
+        "risk_level": "HIGH",
+        "threshold": 0.0493,
+        "timestamp": "2026-03-29T07:03:53.030262",
+        "alert": "EMAIL_SENT_TO_STAKEHOLDERS"
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.9316,
+        "risk_level": "HIGH",
+        "threshold": 0.0493,
+        "timestamp": "2026-03-29T07:20:36.346711",
+        "alert": "EMAIL_SENT_TO_STAKEHOLDERS"
+    },
+    {
+        "prediction": "NOT FRAUD",
+        "fraud_probability": 0.002,
+        "risk_level": "LOW",
+        "threshold": 0.0493,
+        "timestamp": "2026-03-29T07:28:59.793032",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "NOT FRAUD",
+        "fraud_probability": 0.012,
+        "risk_level": "LOW",
+        "threshold": 0.0493,
+        "timestamp": "2026-03-29T07:31:47.117794",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.3005,
+        "risk_level": "HIGH",
+        "threshold": 0.0493,
+        "timestamp": "2026-03-29T07:32:41.027118",
+        "alert": "EMAIL_SENT_TO_STAKEHOLDERS"
+    },
+    {
+        "prediction": "NOT FRAUD",
+        "fraud_probability": 0.002,
+        "risk_level": "LOW",
+        "threshold": 0.0493,
+        "timestamp": "2026-04-05T03:05:48.068083",
+        "authentication": {
+            "facial_authentication": "TRIGGERED",
+            "status": "PENDING_VERIFICATION"
+        }
+    },
+    {
+        "prediction": "FRAUD",
+        "fraud_probability": 0.3005,
+        "risk_level": "HIGH",
+        "threshold": 0.0493,
+        "timestamp": "2026-04-05T03:06:45.213756",
+        "alert": "EMAIL_SENT_TO_STAKEHOLDERS"
+    }
+]
