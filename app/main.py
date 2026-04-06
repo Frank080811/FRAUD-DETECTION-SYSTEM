@@ -76,3 +76,5 @@ def predict(data: FraudPredictionRequest):
 
     finally:
         REQUEST_LATENCY.labels(endpoint="/predict").observe(time.time() - start)
+
+app.include_router(demo_router)
