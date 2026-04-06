@@ -1,6 +1,8 @@
 import json
 import pika
+import time
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
 from app.settings import settings
 
 EXCHANGE_NAME = "fraud.events"
@@ -8,6 +10,35 @@ QUEUE_NAME = "fraud.audit"
 ROUTING_KEY = "fraud.predicted"
 
 engine = create_engine(settings.db_url, future=True)
+
+
+def wait_for_postgres(max_retries=20, delay=5):
+    for attempt in range(1, max_retries + 1):
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            print("Connected to PostgreSQL")
+            return
+        except OperationalError as e:
+            print(f"Postgres not ready (attempt {attempt}/{max_retries}): {e}")
+            time.sleep(delay)
+
+    raise RuntimeError("Could not connect to PostgreSQL after retries")
+
+
+def connect_rabbitmq(max_retries=20, delay=5):
+    params = pika.URLParameters(settings.rabbitmq_url)
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            connection = pika.BlockingConnection(params)
+            print("Connected to RabbitMQ")
+            return connection
+        except Exception as e:
+            print(f"RabbitMQ not ready (attempt {attempt}/{max_retries}): {e}")
+            time.sleep(delay)
+
+    raise RuntimeError("Could not connect to RabbitMQ after retries")
 
 
 def init_db():
@@ -51,10 +82,10 @@ def callback(ch, method, properties, body):
 
 
 def main():
+    wait_for_postgres()
     init_db()
 
-    params = pika.URLParameters(settings.rabbitmq_url)
-    connection = pika.BlockingConnection(params)
+    connection = connect_rabbitmq()
     channel = connection.channel()
 
     channel.exchange_declare(exchange=EXCHANGE_NAME, exchange_type="topic", durable=True)
