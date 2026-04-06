@@ -9,6 +9,7 @@ from app.inference import predict_fraud
 from app.events import publish_event
 
 from app.demo import router as demo_router
+from app.stakeholders import router as stakeholder_router
 
 app = FastAPI(title="Fraud Detection API")
 
@@ -78,3 +79,4 @@ def predict(data: FraudPredictionRequest):
         REQUEST_LATENCY.labels(endpoint="/predict").observe(time.time() - start)
 
 app.include_router(demo_router)
+app.include_router(stakeholder_router)
