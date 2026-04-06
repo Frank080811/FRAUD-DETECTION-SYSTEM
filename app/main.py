@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from prometheus_client import Counter, Histogram, generate_latest
 import time
@@ -67,6 +67,10 @@ def predict(data: FraudPredictionRequest):
             response["alert"] = "QUEUED_FOR_ALERTING"
 
         return response
+
+    except Exception as e:
+        print("PREDICT ERROR:", repr(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
     finally:
         REQUEST_LATENCY.labels(endpoint="/predict").observe(time.time() - start)
