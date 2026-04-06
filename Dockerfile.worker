@@ -9,4 +9,6 @@ COPY app ./app
 COPY workers ./workers
 COPY artifacts ./artifacts
 
+ENV PYTHONPATH=/app
+
 CMD ["python", "workers/alert_worker.py"]
