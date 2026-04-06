@@ -3,11 +3,14 @@ import pika
 import smtplib
 import time
 from email.mime.text import MIMEText
+from sqlalchemy import create_engine, text
 from app.settings import settings
 
 EXCHANGE_NAME = "fraud.events"
 QUEUE_NAME = "fraud.alerts"
 ROUTING_KEY = "fraud.high_risk"
+
+engine = create_engine(settings.db_url, future=True)
 
 
 def connect_with_retry(max_retries=20, delay=5):
@@ -25,12 +28,35 @@ def connect_with_retry(max_retries=20, delay=5):
     raise RuntimeError("Could not connect to RabbitMQ after retries")
 
 
+def get_active_recipients():
+    with engine.connect() as conn:
+        rows = conn.execute(text("""
+            SELECT email
+            FROM alert_stakeholders
+            WHERE is_active = TRUE
+            ORDER BY id ASC
+        """)).fetchall()
+
+    db_recipients = [row[0] for row in rows]
+
+    env_recipients = []
+    if settings.smtp_to:
+        env_recipients = [x.strip() for x in settings.smtp_to.split(",") if x.strip()]
+
+    recipients = list(dict.fromkeys(env_recipients + db_recipients))
+    return recipients
+
+
 def send_email_alert(event: dict):
     data = event["request"]
     pred = event["prediction"]
     top_features = event["top_features"]
 
-    receivers = [x.strip() for x in settings.smtp_to.split(",") if x.strip()]
+    receivers = get_active_recipients()
+    if not receivers:
+        print("No active alert recipients configured")
+        return
+
     subject = f"🚨 HIGH FRAUD ALERT ({pred['risk_level']})"
 
     body = f"""
@@ -40,11 +66,8 @@ Risk Level: {pred['risk_level']}
 Fraud Probability: {pred['fraud_probability']}
 Timestamp (UTC): {pred['timestamp']}
 
-Client Info:
-Name: {data.get('customer_name', 'N/A')}
-Email: {data.get('customer_email', 'N/A')}
-Phone: {data.get('customer_phone', 'N/A')}
-Transaction ID: {data.get('transaction_id', 'N/A')}
+Transaction / Request Details:
+{json.dumps(data, indent=2)}
 
 Top Features:
 {json.dumps(top_features, indent=2)}
@@ -55,14 +78,20 @@ Top Features:
     msg["From"] = settings.smtp_from
     msg["To"] = ", ".join(receivers)
 
+    print("Sending email to:", receivers)
+
     with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
         server.starttls()
         server.login(settings.smtp_user, settings.smtp_password)
         server.sendmail(settings.smtp_from, receivers, msg.as_string())
 
+    print("Email alert sent successfully")
+
 
 def callback(ch, method, properties, body):
     event = json.loads(body.decode("utf-8"))
+    print("Received high-risk event:", event["prediction"])
+
     try:
         send_email_alert(event)
         ch.basic_ack(delivery_tag=method.delivery_tag)
