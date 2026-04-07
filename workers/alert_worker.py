@@ -44,23 +44,51 @@ def get_active_recipients():
 
 
 def send_email_alert(event: dict):
-    data = event["request"]
-    pred = event["prediction"]
-    top_features = event["top_features"]
+    import os
+    import resend
 
-    receivers = get_active_recipients()
-    if not receivers:
-        print("⚠️ No active alert recipients configured")
-        return
+    try:
+        print("🚀 Starting email alert process...")
 
-    subject = f"🚨 HIGH FRAUD ALERT ({pred['risk_level']})"
+        # Safe extraction (prevents KeyError crashes)
+        data = event.get("request", {})
+        pred = event.get("prediction", {})
+        top_features = event.get("top_features", {})
 
-    body = f"""
+        # Get recipients
+        receivers = get_active_recipients()
+
+        print("📧 Receivers:", receivers)
+
+        if not receivers:
+            print("⚠️ No active alert recipients configured")
+            return
+
+        # Validate required settings
+        if not settings.email_from:
+            print("❌ EMAIL_FROM is not set")
+            return
+
+        resend_api_key = os.getenv("RESEND_API_KEY")
+
+        if not resend_api_key:
+            print("❌ RESEND_API_KEY is missing in environment variables")
+            return
+
+        resend.api_key = resend_api_key
+
+        print("🔑 Resend API key loaded:", bool(resend.api_key))
+        print("📨 Sending FROM:", settings.email_from)
+
+        # Email content
+        subject = f"🚨 HIGH FRAUD ALERT ({pred.get('risk_level', 'UNKNOWN')})"
+
+        body = f"""
 <h2>🚨 Fraud Alert Triggered</h2>
 
-<p><strong>Risk Level:</strong> {pred['risk_level']}</p>
-<p><strong>Fraud Probability:</strong> {pred['fraud_probability']}</p>
-<p><strong>Timestamp (UTC):</strong> {pred['timestamp']}</p>
+<p><strong>Risk Level:</strong> {pred.get('risk_level')}</p>
+<p><strong>Fraud Probability:</strong> {pred.get('fraud_probability')}</p>
+<p><strong>Timestamp (UTC):</strong> {pred.get('timestamp')}</p>
 
 <h3>Transaction Details:</h3>
 <pre>{json.dumps(data, indent=2)}</pre>
@@ -69,9 +97,9 @@ def send_email_alert(event: dict):
 <pre>{json.dumps(top_features, indent=2)}</pre>
 """
 
-    print("📧 Sending email to:", receivers)
+        print("📧 Sending email to:", receivers)
 
-    try:
+        # Send email via Resend
         response = resend.Emails.send({
             "from": settings.email_from,
             "to": receivers,
@@ -82,9 +110,8 @@ def send_email_alert(event: dict):
         print("✅ Email sent successfully:", response)
 
     except Exception as e:
-        print(f"❌ Email failed: {e}")
+        print("🔥 FULL EMAIL ERROR:", str(e))
         raise
-
 
 def callback(ch, method, properties, body):
     event = json.loads(body.decode("utf-8"))
