@@ -10,4 +10,4 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["bash", "-c", "python workers/alert_worker.py 2>&1 | tee /tmp/log.txt; echo '❌ WORKER CRASHED'; sleep 1000"]
+CMD ["bash", "-c", "echo '🚀 STARTING WORKER'; python workers/alert_worker.py; echo '❌ WORKER EXITED'; sleep 1000"]
