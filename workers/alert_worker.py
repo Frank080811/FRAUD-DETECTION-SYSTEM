@@ -1,10 +1,12 @@
 import json
 import pika
-import smtplib
 import time
-from email.mime.text import MIMEText
+import resend
 from sqlalchemy import create_engine, text
 from app.settings import settings
+
+# Initialize Resend
+resend.api_key = settings.resend_api_key
 
 EXCHANGE_NAME = "fraud.events"
 QUEUE_NAME = "fraud.alerts"
@@ -37,13 +39,7 @@ def get_active_recipients():
             ORDER BY id ASC
         """)).fetchall()
 
-    db_recipients = [row[0] for row in rows]
-
-    env_recipients = []
-    if settings.smtp_to:
-        env_recipients = [x.strip() for x in settings.smtp_to.split(",") if x.strip()]
-
-    recipients = list(dict.fromkeys(env_recipients + db_recipients))
+    recipients = [row[0] for row in rows]
     return recipients
 
 
@@ -54,49 +50,51 @@ def send_email_alert(event: dict):
 
     receivers = get_active_recipients()
     if not receivers:
-        print("No active alert recipients configured")
+        print("⚠️ No active alert recipients configured")
         return
 
     subject = f"🚨 HIGH FRAUD ALERT ({pred['risk_level']})"
 
     body = f"""
-Fraud Alert Triggered
+<h2>🚨 Fraud Alert Triggered</h2>
 
-Risk Level: {pred['risk_level']}
-Fraud Probability: {pred['fraud_probability']}
-Timestamp (UTC): {pred['timestamp']}
+<p><strong>Risk Level:</strong> {pred['risk_level']}</p>
+<p><strong>Fraud Probability:</strong> {pred['fraud_probability']}</p>
+<p><strong>Timestamp (UTC):</strong> {pred['timestamp']}</p>
 
-Transaction / Request Details:
-{json.dumps(data, indent=2)}
+<h3>Transaction Details:</h3>
+<pre>{json.dumps(data, indent=2)}</pre>
 
-Top Features:
-{json.dumps(top_features, indent=2)}
+<h3>Top Features:</h3>
+<pre>{json.dumps(top_features, indent=2)}</pre>
 """
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = settings.smtp_from
-    msg["To"] = ", ".join(receivers)
+    print("📧 Sending email to:", receivers)
 
-    print("Sending email to:", receivers)
+    try:
+        response = resend.Emails.send({
+            "from": settings.email_from,
+            "to": receivers,
+            "subject": subject,
+            "html": body,
+        })
 
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
-        server.starttls()
-        server.login(settings.smtp_user, settings.smtp_password)
-        server.sendmail(settings.smtp_from, receivers, msg.as_string())
+        print("✅ Email sent successfully:", response)
 
-    print("Email alert sent successfully")
+    except Exception as e:
+        print(f"❌ Email failed: {e}")
+        raise
 
 
 def callback(ch, method, properties, body):
     event = json.loads(body.decode("utf-8"))
-    print("Received high-risk event:", event["prediction"])
+    print("🚨 Received high-risk event:", event["prediction"])
 
     try:
         send_email_alert(event)
         ch.basic_ack(delivery_tag=method.delivery_tag)
     except Exception as e:
-        print(f"Email failed: {e}")
+        print(f"❌ Processing failed: {e}")
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
 
 
@@ -107,10 +105,11 @@ def main():
     channel.exchange_declare(exchange=EXCHANGE_NAME, exchange_type="topic", durable=True)
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
     channel.queue_bind(exchange=EXCHANGE_NAME, queue=QUEUE_NAME, routing_key=ROUTING_KEY)
+
     channel.basic_qos(prefetch_count=10)
     channel.basic_consume(queue=QUEUE_NAME, on_message_callback=callback)
 
-    print("Alert worker listening...")
+    print("🚀 Alert worker listening...")
     channel.start_consuming()
 
 
