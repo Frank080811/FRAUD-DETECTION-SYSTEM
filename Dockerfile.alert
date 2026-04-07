@@ -12,4 +12,4 @@ ENV PYTHONPATH=/app
 # 🔥 OVERRIDE EVERYTHING
 ENTRYPOINT ["bash", "-c"]
 
-CMD ["echo '🚀 STARTING WORKER'; python workers/alert_worker.py; echo '❌ WORKER EXITED'; sleep 1000"]
+CMD ["bash", "-c", "echo '🚀 STARTING WORKER'; python workers/alert_worker.py 2>&1; echo '❌ WORKER CRASHED'; sleep 1000"]
