@@ -1,9 +1,16 @@
+print("🔥 WORKER FILE LOADED")
 import json
 import pika
 import time
 import resend
 from sqlalchemy import create_engine, text
-from app.settings import settings
+try:
+    from app.settings import settings
+    print("✅ SETTINGS LOADED")
+    print("📨 EMAIL_FROM:", repr(settings.email_from))
+except Exception as e:
+    print("❌ SETTINGS FAILED:", e)
+    raise
 
 # Initialize Resend
 resend.api_key = settings.resend_api_key
